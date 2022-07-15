@@ -13,7 +13,7 @@ services:
       - ./:/usr/src/app
       - daab:/usr/src/app/node_modules
     tty: true
-    entrypoint: bash -c "sh entrypoint.sh"
+    # entrypoint: bash -c "sh entrypoint.sh"
 
 volumes:
   daab:

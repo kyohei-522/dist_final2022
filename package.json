@@ -15,7 +15,9 @@
   "description": "",
   "dependencies": {
     "clarifai": "^2.9.1",
+    "clarifai-nodejs-grpc": "^8.0.0",
     "forever": "^4.0.0",
+    "fs": "^0.0.1-security",
     "googleapis": "^104.0.0",
     "kuromoji": "^0.1.2",
     "lisb-hubot": ">=4.0.0 <5.0.0",
