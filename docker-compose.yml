@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  daab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: daab:202207011340
+    container_name: daab
+    environment:
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./:/usr/src/app
+      - daab:/usr/src/app/node_modules
+    tty: true
+    entrypoint: bash -c "sh entrypoint.sh"
+
+volumes:
+  daab:
