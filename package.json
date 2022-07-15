@@ -14,6 +14,7 @@
   ],
   "description": "",
   "dependencies": {
+    "clarifai": "^2.9.1",
     "forever": "^4.0.0",
     "googleapis": "^104.0.0",
     "kuromoji": "^0.1.2",

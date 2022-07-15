@@ -32,6 +32,8 @@ RUN npm install -g pg
 
 RUN npm install -g googleapis
 
+RUN npm install -g clarifai
+
 RUN apt-get purge nodejs npm -y
 
 RUN apt-get autoremove -y
