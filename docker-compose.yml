@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: daab:202207011340
+    image: daab:final_ex
     container_name: daab
     environment:
       TZ: "Asia/Tokyo"
