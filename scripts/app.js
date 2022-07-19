@@ -1,10 +1,13 @@
 const fs = require("fs");
+
+//save local
 const path = require("path");
+const Jimp = require('jimp');
+
 //googleAPI
 const {google} = require('googleapis');
 const {GoogleAuth} = require('google-auth-library');
 const privatekey = require("./privatekey.json");
-const Jimp = require('jimp');
 
 let jwtClient = new google.auth.JWT(
   privatekey.client_email,
@@ -74,7 +77,7 @@ module.exports = (robot) => {
               cnt += 1;
             }
             res.send({
-              question: 'どの名前で保存する？',
+              question: 'どのタグをつける？',
               options: msg,
               onsend: (sent) => {
               questionSentId[res.message.rooms[res.message.room].id] = sent.message.id;
@@ -91,9 +94,9 @@ module.exports = (robot) => {
       if (res.json.response === null) {
       res.send(`Your question is ${res.json.question}.`);
       } else {
-        //rename
+        //rename&move
         const dir = "./images";
-        const addHead = res.json.options[res.json.response];
+        const addHead = res.json.options[res.json.response] + '_';
         const fileNameList = fs.readdirSync(dir);
         const targetFileNames = fileNameList.filter(RegExp.prototype.test, /.*\.jpg$/); // jpg filter
         console.log(targetFileNames);
@@ -101,13 +104,14 @@ module.exports = (robot) => {
           // console.log(fileName)
           const filePath = {};
           const newName = addHead + fileName;
+          const moved_dir = "./images/add_tag";
           filePath.before = path.join(dir, fileName);
-          filePath.after = path.join(dir, newName);
+          filePath.after = path.join(moved_dir, newName);
           // console.log(filePath);
         fs.rename(filePath.before, filePath.after, err => {
           if (err) throw err;
           console.log(filePath.before + "-->" + filePath.after);
-          });
+        });
         });
         res.send({
           text: `${res.json.options[res.json.response]}でタグ付しました`,
@@ -117,7 +121,37 @@ module.exports = (robot) => {
             });
           }
         });
-        
       }
     });
+    // robot.respond(/PING$/i, (res) => {
+    //driveにアップロードするテスト（うまく行かない。バージョンエラー？）
+    //   upload();
+    //   res.send('PONG');
+    // });
 };
+
+// async function upload() {
+//   // Get credentials and build service
+//   // TODO (developer) - Use appropriate auth mechanism for your app
+//   const auth = new GoogleAuth({scopes: 'https://www.googleapis.com/auth/drive'});
+//   const service = google.drive({version: 'v3', auth});
+//   const fileMetadata = {
+//     'title': 'test.jpg',
+//   };
+//   const media = {
+//     mimeType: 'image/jpeg',
+//     body: fs.createReadStream('images/test.jpg'),
+//   };
+//   try {
+//     const file = await service.files.create({
+//       resource: fileMetadata,
+//       media: media,
+//       fields: 'id',
+//     });
+//     console.log('File Id:', file.data.id);
+//     return file.data.id;
+//   } catch (err) {
+//     // TODO(developer) - Handle error
+//     throw err;
+//   }
+// }
