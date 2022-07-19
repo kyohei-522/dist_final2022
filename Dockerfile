@@ -40,6 +40,8 @@ RUN npm install -g fs
 
 RUN npm install -g google-auth-library
 
+RUN npm install -g path
+
 RUN npm install -g jimp
 
 RUN apt-get purge nodejs npm -y

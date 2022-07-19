@@ -1,5 +1,5 @@
 const fs = require("fs");
-
+const path = require("path");
 //googleAPI
 const {google} = require('googleapis');
 const {GoogleAuth} = require('google-auth-library');
@@ -34,33 +34,17 @@ module.exports = (robot) => {
     let questionSentId = {};
     const onfile = (res, file) => {
       res.download(file, (path) => {
+        const imageBytes = fs.readFileSync(path, { encoding: "base64" });
         let ext = file.name.slice(-4);
         Jimp.read(path).then((image) => {
             let newFileName = Math.random().toString(32).substring(2) + ext;
             image.write('images/' + newFileName, (err, image) => {
-              res.send({
-                path: 'images/' + newFileName
-              });
+              // res.send({
+              //   path: 'images/' + newFileName
+              // });
+              console.log('save local file')
             });
           });
-        });
-        // const auth = new GoogleAuth({scopes: 'https://www.googleapis.com/auth/drive'});
-        // const drive = google.drive({version: 'v3', auth});
-        // const fileName = file.name;
-        // const folderId = folderID;
-        // const params = {
-        //   resource: {
-        //       name: fileName,
-        //       parents: [folderId]
-        //   },
-        //   media: {
-        //       mimeType: 'image/jpeg',
-        //       body: fs.createReadStream()
-        //     },
-        //     fields: 'id'
-        // };
-        // const res = drive.files.create(params);
-        // console.log(res.data);
         stub.PostModelOutputs(
           {
             // This is the model ID of a publicly available General model. You may use any other public or custom model ID.
@@ -89,16 +73,17 @@ module.exports = (robot) => {
               msg.push(c.name);
               cnt += 1;
             }
-            // res.send({
-            //   question: 'どの名前で保存する？',
-            //   options: msg,
-            //   onsend: (sent) => {
-            //   questionSentId[res.message.rooms[res.message.room].id] = sent.message.id;
-            //   }
-            //   });
+            res.send({
+              question: 'どの名前で保存する？',
+              options: msg,
+              onsend: (sent) => {
+              questionSentId[res.message.rooms[res.message.room].id] = sent.message.id;
+              }
+              });
           }
         );
-      };
+      });
+    };
     robot.respond('file', (res) => {
       onfile(res, res.json);
     });
@@ -106,16 +91,33 @@ module.exports = (robot) => {
       if (res.json.response === null) {
       res.send(`Your question is ${res.json.question}.`);
       } else {
-      res.send({
-      text: `${res.json.options[res.json.response]}で画像を保存しました`,
-      onsend: (sent) => {
-      res.send({
-        close_select: questionSentId[res.message.rooms[res.message.room].id]
-      });
+        //rename
+        const dir = "./images";
+        const addHead = res.json.options[res.json.response];
+        const fileNameList = fs.readdirSync(dir);
+        const targetFileNames = fileNameList.filter(RegExp.prototype.test, /.*\.jpg$/); // jpg filter
+        console.log(targetFileNames);
+        targetFileNames.forEach(fileName => {
+          // console.log(fileName)
+          const filePath = {};
+          const newName = addHead + fileName;
+          filePath.before = path.join(dir, fileName);
+          filePath.after = path.join(dir, newName);
+          // console.log(filePath);
+        fs.rename(filePath.before, filePath.after, err => {
+          if (err) throw err;
+          console.log(filePath.before + "-->" + filePath.after);
+          });
+        });
+        res.send({
+          text: `${res.json.options[res.json.response]}でタグ付しました`,
+          onsend: (sent) => {
+            res.send({
+              close_select: questionSentId[res.message.rooms[res.message.room].id]
+            });
+          }
+        });
+        
       }
-      });
-      }
-      let newFileName = res.json.options[res.json.response];
-      
     });
 };
